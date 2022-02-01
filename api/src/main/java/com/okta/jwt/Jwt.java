@@ -46,4 +46,11 @@ public interface Jwt {
      * @return the token body clams as Map
      */
     Map<String, Object> getClaims();
+
+
+    /**
+     * Returns the token body clams as a {@link Claims}.
+     * @return the token body clams as a {@link Claims}
+     */
+    Claims claims();
 }

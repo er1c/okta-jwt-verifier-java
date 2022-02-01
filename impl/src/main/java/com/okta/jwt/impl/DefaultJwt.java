@@ -15,6 +15,7 @@
  */
 package com.okta.jwt.impl;
 
+import com.okta.jwt.Claims;
 import com.okta.jwt.Jwt;
 
 import java.time.Instant;
@@ -34,7 +35,7 @@ import static com.okta.commons.lang.Assert.notNull;
 public class DefaultJwt implements Jwt {
 
     private final String tokenValue;
-    private final Map<String, Object> claims;
+    private final Claims claims;
     private final Instant issuedAt;
     private final Instant expiresAt;
 
@@ -59,7 +60,31 @@ public class DefaultJwt implements Jwt {
         this.tokenValue = tokenValue;
         this.issuedAt = issuedAt;
         this.expiresAt = expiresAt;
-        this.claims = Collections.unmodifiableMap(new LinkedHashMap<>(claims));
+        this.claims = new DefaultClaims(Collections.unmodifiableMap(new LinkedHashMap<>(claims)));
+    }
+
+    /**
+     * Creates an instance based on input from an already parsed and validated JWT.
+     * @param tokenValue Original JWT string
+     * @param issuedAt The value from the {@code iat} claim, as an {@link Instant}
+     * @param expiresAt The value from the {@code exp} claim, as an {@link Instant}
+     * @param claims The original claim values in the JWT, as an {@link Claims}
+     * @see com.okta.jwt.impl.jjwt.TokenVerifierSupport for actual JWT parsing logic.
+     */
+    public DefaultJwt(String tokenValue,
+                      Instant issuedAt,
+                      Instant expiresAt,
+                      Claims claims) {
+
+        notNull(tokenValue, "JWT token cannot be null");
+        notNull(issuedAt, "issuedAt cannot be null");
+        notNull(expiresAt, "expiresAt cannot be null");
+        notEmpty(claims, "claims cannot be empty");
+
+        this.tokenValue = tokenValue;
+        this.issuedAt = issuedAt;
+        this.expiresAt = expiresAt;
+        this.claims = claims;
     }
 
     @Override
@@ -79,6 +104,11 @@ public class DefaultJwt implements Jwt {
 
     @Override
     public Map<String, Object> getClaims() {
+        return this.claims;
+    }
+
+    @Override
+    public Claims claims() {
         return this.claims;
     }
 }
